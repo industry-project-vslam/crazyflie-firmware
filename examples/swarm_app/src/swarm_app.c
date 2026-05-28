@@ -70,6 +70,7 @@
 #include "cpx.h"
 #include "stabilizer_types.h"
 #include "supervisor.h"
+#include "param.h"
 
 #define DEBUG_MODULE "SWARM"
 #include "debug.h"
@@ -262,6 +263,11 @@ void appMain(void)
     DEBUG_PRINT("Swarm app starting | id=%u | home=(%.2f,%.2f) | max_peers=%u\n",
                 (unsigned)myId, (double)homeX, (double)homeY, MAX_DRONES);
 
+    /* Enable the High-Level Commander so CFClient Takeoff/Land/GoTo work.
+     * commander.enHighLevel defaults to 0; setting it to 1 makes the
+     * CFClient Takeoff/Land/GoTo buttons active. */
+    paramSetInt(paramGetVarId("commander", "enHighLevel"), 1);
+
     /* Register AI deck CPX handler */
     cpxRegisterAppMessageHandler(aiDeckHandler);
 
@@ -400,10 +406,10 @@ void appMain(void)
                 if (supervisorIsFlying()) {
                     /* Only move when already airborne */
                     /* Convert global avoidance target back to Kalman-local frame */
-                    // crtpCommanderHighLevelGoTo(nx - homeX, ny - homeY, pos.z,
-                    //                            0.0f,
-                    //                            AVOIDANCE_DURATION_S,
-                    //                            false /* absolute coords */);
+                    crtpCommanderHighLevelGoTo(nx - homeX, ny - homeY, pos.z,
+                                               0.0f,
+                                               AVOIDANCE_DURATION_S,
+                                               false /* absolute coords */);
                     DEBUG_PRINT("AVOIDANCE ACTIVE: drone %u too close (%.2fm) -> moving to (%.2f, %.2f)\n",
                                 (unsigned)myId, (double)closestDist,
                                 (double)nx, (double)ny);
